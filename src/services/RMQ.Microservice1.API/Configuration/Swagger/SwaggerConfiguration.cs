@@ -36,7 +36,7 @@ namespace RMQ.Microservice1.API.Configuration.Swagger
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Microservice1 v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Microservice2 v1"));
             }
 
             return app;

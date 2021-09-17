@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
+using RMQ.API.Core.Configuration;
 using RMQ.Microservice1.API.Configuration.Swagger;
 using System;
 using System.Collections.Generic;
@@ -17,12 +14,13 @@ namespace RMQ.Microservice1.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
         public IConfiguration Configuration { get; }
+
+        public Startup(IHostEnvironment hostEnvironment)
+        {
+            IConfigurationBuilder builder = StartupConfiguration.ConfigureEnvironment<Startup>(hostEnvironment);
+            Configuration = builder.Build();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -30,7 +28,6 @@ namespace RMQ.Microservice1.API
 
             services.AddSwaggerConfiguration();
             services.AddControllers();
-
 
         }
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RMQ.API.Core.Configuration;
 using RMQ.Microservice3.API.Configuration.Swagger;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,13 @@ namespace RMQ.Microservice3.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
         public IConfiguration Configuration { get; }
+
+        public Startup(IHostEnvironment hostEnvironment)
+        {
+            IConfigurationBuilder builder = StartupConfiguration.ConfigureEnvironment<Startup>(hostEnvironment);
+            Configuration = builder.Build();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
