@@ -9,23 +9,38 @@ namespace RMQ.EventBus.Core.Events
 {
     public class IntegrationEvent
     {
+        #region Variables
+
+        private Guid _id;
+        private DateTime _creationDate;
+
+        #endregion
+
+        #region Properties
+
+        [JsonProperty]
+        public Guid Id { get => _id; }
+        [JsonProperty]
+        public DateTime CreationDate { get => _creationDate; }
+
+        #endregion
+
+        #region Constructors
+
         public IntegrationEvent()
         {
-            Id = Guid.NewGuid();
-            CreationDate = DateTime.UtcNow;
+            _id = Guid.NewGuid();
+            _creationDate = DateTime.UtcNow;
         }
 
         [JsonConstructor]
         public IntegrationEvent(Guid id, DateTime createDate)
         {
-            Id = id;
-            CreationDate = createDate;
+            _id = id;
+            _creationDate = createDate;
         }
 
-        [JsonProperty]
-        public Guid Id { get; private set; }
+        #endregion       
 
-        [JsonProperty]
-        public DateTime CreationDate { get; private set; }
     }
 }

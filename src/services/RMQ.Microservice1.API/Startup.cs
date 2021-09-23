@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RMQ.API.Core.Configuration;
+using RMQ.Microservice1.API.Configuration;
 using RMQ.Microservice1.API.Configuration.Swagger;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace RMQ.Microservice1.API
         {
 
             services.AddSwaggerConfiguration();
+            services.AddDIConfiguration();
             services.AddControllers();
 
         }
