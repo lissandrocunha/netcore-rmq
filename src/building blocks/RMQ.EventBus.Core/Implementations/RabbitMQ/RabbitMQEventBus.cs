@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RMQ.EventBus.Core.Abstractions.Objects;
 using RMQ.EventBus.Core.Implementations.RabbitMQ.Objects;
+using RabbitMQ.Client.Events;
 
 namespace RMQ.EventBus.Core.Implementations.RabbitMQ
 {
@@ -243,7 +244,6 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
 
         }
 
-
         public void Publish(IntegrationEvent @event, string exchange, string routingKey)
         {
             _logger.LogInformation("Publishing Event({0} - ID:{1}, Created: {2}) on RabbitMQ...",
@@ -255,6 +255,10 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
                 using (var connection = _connectionFactory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
+                    channel.ConfirmSelect();
+                    channel.BasicAcks += Evento_Confirmacao;
+                    channel.BasicNacks += Evento_NaoConfirmacao;
+
                     var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(@event));
                     routingKey = string.IsNullOrWhiteSpace(routingKey) ? @event.GetType().Name?.ToLower().Replace("integrationevent", "") : routingKey;
 
@@ -265,11 +269,6 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
                                          routingKey: routingKey,
                                          basicProperties: properties,
                                          body: body);
-
-                    //channel.BasicPublish(exchange: exchange,
-                    //                     routingKey: @event.GetType().Name.Replace("IntegrationEvent", "")?.ToLower(),
-                    //                     basicProperties: null,
-                    //                     body: body);
                 }
             }
             catch (Exception ex)
@@ -280,55 +279,42 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
             _logger.LogInformation("Event Published.");
         }
 
-        public Task PublishAsync(IntegrationEvent @event)
+        public Task<IntegrationEvent> Consume<T>(string queue)
+            where T : IntegrationEvent
         {
-            _logger.LogInformation("Publishing Event({0} - ID:{1}, Created: {2}) on RabbitMQ...",
-                                   @event.GetType().Name,
-                                   @event.Id,
-                                   @event.CreationDate);
+            IntegrationEvent message = null;
+            _logger.LogInformation("Consuming Messages on Queue {0} on RabbitMQ...", queue);
 
             try
             {
-                //var success = _bus.PubSub.PublishAsync(@event)
-                //                         .ContinueWith(task =>
-                //                         {
-                //                             switch (task.Status)
-                //                             {
-                //                                 case TaskStatus.Created:
-                //                                     _logger.LogInformation("Event Created...");
-                //                                     break;
-                //                                 case TaskStatus.WaitingForActivation:
-                //                                     _logger.LogInformation("Event Waiting for Activation...");
-                //                                     break;
-                //                                 case TaskStatus.WaitingToRun:
-                //                                     _logger.LogInformation("Event Waiting to Run...");
-                //                                     break;
-                //                                 case TaskStatus.Running:
-                //                                     _logger.LogInformation("Event Running...");
-                //                                     break;
-                //                                 case TaskStatus.WaitingForChildrenToComplete:
-                //                                     _logger.LogInformation("Event Waiting Children(s) to Complete...");
-                //                                     break;
-                //                                 case TaskStatus.RanToCompletion:
-                //                                     _logger.LogInformation("Event Ran to Completion...");
-                //                                     break;
-                //                                 case TaskStatus.Canceled:
-                //                                     _logger.LogInformation("Event Canceled...");
-                //                                     break;
-                //                                 case TaskStatus.Faulted:
-                //                                     _logger.LogError("Event Faulted.");
-                //                                     break;
-                //                             }
-                //                         });
+                using (var connection = _connectionFactory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    channel.ConfirmSelect();
+                    channel.BasicAcks += Evento_Confirmacao;
+                    channel.BasicNacks += Evento_NaoConfirmacao;
 
-                _logger.LogInformation("Event Published.");
-                return null;// success;
+                    var consumer = new EventingBasicConsumer(channel);
+
+                    consumer.Received += (model, ea) =>
+                    {
+                        var body = ea.Body.ToArray();
+                        message = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(body));
+                    };
+
+                    channel.BasicConsume(queue,
+                                         true,
+                                         consumer);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error on Publishing: {0}", ex);
-                return Task.CompletedTask;
+                _logger.LogError("Error on Consuming Messages on Queue {0} on RabbitMQ...", queue);
+                return null;
             }
+
+            _logger.LogInformation("Message Consumed.");
+            return Task.FromResult(message);
         }
 
         public void Respond<TRequest, TResponse>()
@@ -336,68 +322,7 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
             where TResponse : IIntegrationEventHandler
         {
 
-        }
-
-        public void Subscribe<TEvent, TEventHandler>()
-            where TEvent : IntegrationEvent
-            where TEventHandler : IIntegrationEventHandler
-        {
-
-        }
-
-        public void Unsubscribe<TEvent, TEventHandler>()
-            where TEvent : IntegrationEvent
-            where TEventHandler : IIntegrationEventHandler
-        {
-            throw new NotImplementedException();
-        }
-
-        //public TR Request<T, TR>(T @event)
-        //    where T : IntegrationEvent
-        //    where TR : IIntegrationEventHandler<T>
-        //{
-        //    _logger.LogInformation("Request Event({0} - ID:{1}, Created: {2}) on RabbitMQ...",
-        //                           @event.GetType().Name,
-        //                           @event.Id,
-        //                           @event.CreationDate);
-
-        //    //try
-        //    //{
-        //    //var success = _bus.Rpc.Request<T, TR>(@event);
-
-        //    _logger.LogInformation("Event Published.");
-        //    return success;
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    _logger.LogError("Error on Publishing: {0}", ex);
-        //    //    return Task.FromResult(null);
-        //    //}
-        //}
-
-        //public async Task<TR> RequestAsync<T, TR>(T @event)
-        //    where T : IntegrationEvent
-        //    where TR : IIntegrationEventHandler<T>
-        //{
-        //    _logger.LogInformation("Request Event({0} - ID:{1}, Created: {2}) on RabbitMQ...",
-        //                           @event.GetType().Name,
-        //                           @event.Id,
-        //                           @event.CreationDate);
-
-        //    //try
-        //    //{
-        //    //var success = await _bus.Rpc.RequestAsync<T, TR>(@event);
-
-        //    _logger.LogInformation("Event Published.");
-        //    return TR;
-        //    //return success;
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    _logger.LogError("Error on Publishing: {0}", ex);
-        //    //    return null;
-        //    //}
-        //}
+        }     
 
         public void Dispose()
         {
@@ -406,6 +331,17 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ
             //    _bus.Dispose();
             //}
         }
+
+        private void Evento_Confirmacao(object sender, BasicAckEventArgs e)
+        {
+            _logger.LogInformation("Confirmação do evento: {0} - {1}", sender.ToString(), e.DeliveryTag);
+        }
+
+        private void Evento_NaoConfirmacao(object sender, BasicNackEventArgs e)
+        {
+            _logger.LogError("Erro de confirmação do evento: {0} - {1}", sender.ToString(), e.DeliveryTag);
+        }
+
 
         #endregion
 

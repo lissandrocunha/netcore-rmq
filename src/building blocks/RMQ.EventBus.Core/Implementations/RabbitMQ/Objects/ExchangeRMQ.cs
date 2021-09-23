@@ -13,21 +13,25 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ.Objects
         private readonly string _type;
         private readonly bool _durable = false;
         private readonly bool _autoDelete = false;
+        private readonly IDictionary<string, object> _arguments;
 
-        public string Name { get => _name; }
-        public string Type { get => _type; }
-        public bool Durable { get => _durable; }
-        public bool AutoDelete { get => _autoDelete; }
+        public string Name => _name;
+        public string Type => _type;
+        public bool Durable => _durable;
+        public bool AutoDelete => _autoDelete;
+        public IDictionary<string, object> Arguments => _arguments;
 
         public ExchangeRMQ(string name,
                            string type,
                            bool durable = false,
-                           bool autoDelete = false)
+                           bool autoDelete = false,
+                           IDictionary<string, object> arguments = null)
         {
             _name = name;
             _type = type;
             _durable = durable;
             _autoDelete = autoDelete;
+            _arguments = arguments;
         }
 
     }

@@ -21,8 +21,19 @@ namespace RMQ.Microservice2.API.Controllers
         public ServicesController(IEventBus bus)
         {
             _bus = bus;
-            //_bus.CreateBus("localhost", 5672, "guest", "guest",
+            _bus.CreateBus("localhost", 5672, "guest", "guest");
             //               new Dictionary<string, string>() { { "eventbus", "direct" } });
+        }
+
+        [HttpGet]
+        [Route("check-wakeup")]
+        public ActionResult Snoozing(string service)
+        {
+            var snoozingEvent = new SnoozingIntegrationEvent("service2");
+
+            var message = _bus.Consume<SnoozingIntegrationEvent>("snoozing");
+
+            return CustomResponse("Teste OK!");
         }
 
         [HttpGet]

@@ -17,15 +17,15 @@ namespace RMQ.EventBus.Core.Abstractions
         object Status();
 
         /// <summary>
-        /// 
+        /// Create a Bus
         /// </summary>
         /// <param name="hostname"></param>
         /// <param name="port"></param>
         /// <param name="userName"></param>
         /// <param name="password"></param>
-        /// <param name="exchanges"></param>
-        /// <param name="queues"></param>
-        /// <param name="bindings"></param>
+        /// <param name="exchanges">Exchanges to create on Bus</param>
+        /// <param name="queues">Queues to create on Bus</param>
+        /// <param name="bindings">Bindings to create</param>
         public void CreateBus(string hostname,
                               int port,
                               string userName,
@@ -38,43 +38,14 @@ namespace RMQ.EventBus.Core.Abstractions
         /// Publishes a event
         /// </summary>
         /// <param name="event">Event to Publish</param>
+        /// <param name="exchange">Exange to use</param>
+        /// <param name="routingKey">Tag to use</param>
         void Publish(IntegrationEvent @event, string exchange = "", string routingKey = "");
 
-        /// <summary>
-        /// Publishes event assinchronous
-        /// </summary>
-        /// <param name="event"></param>
-        Task PublishAsync(IntegrationEvent @event);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TEvent"></typeparam>
-        /// <typeparam name="TEventHandler"></typeparam>
-        /// <param name="event"></param>
-        /// <returns></returns>
-        //TEventHandler Request<TEvent, TEventHandler>(TEvent @event)
-        //    where TEvent : IntegrationEvent
-        //    where TEventHandler : IIntegrationEventHandler<TEvent>;
+        public Task<IntegrationEvent> Consume<T>(string queue)
+            where T : IntegrationEvent;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TEvent"></typeparam>
-        /// <typeparam name="TEventHandler"></typeparam>
-        /// <param name="event"></param>
-        /// <returns></returns>
-        //Task<TEventHandler> RequestAsync<TEvent, TEventHandler>(TEvent @event)
-        //    where TEvent : IntegrationEvent
-        //    where TEventHandler : IIntegrationEventHandler<TEvent>;
-
-        //void Subscribe<TEvent, TEventHandler>()
-        //    where TEvent : IntegrationEvent
-        //    where TEventHandler : IIntegrationEventHandler;
-
-        //void Unsubscribe<TEvent, TEventHandler>()
-        //    where TEvent : IntegrationEvent
-        //    where TEventHandler : IIntegrationEventHandler;
 
     }
 }

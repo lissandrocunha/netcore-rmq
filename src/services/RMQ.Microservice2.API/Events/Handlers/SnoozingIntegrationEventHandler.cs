@@ -17,7 +17,6 @@ namespace RMQ.Microservice2.API.Events.Handlers
         #region Variables
 
         private IEventBus _bus;
-        private string _connectionString;
         private readonly ILogger _logger;
 
         #endregion

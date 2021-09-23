@@ -24,32 +24,16 @@ namespace RMQ.Microservice1.API.Controllers
             _bus = bus;
             _bus.CreateBus("localhost", 5672, "guest", "guest",
                            new List<IExchange>() {
-                               new ExchangeRMQ("eventbus","direct",true,false)
+                               new ExchangeRMQ("eventbus","direct",true,false),
+                               new ExchangeRMQ("eventbus-dlx","direct",true,false)
                            },
                            new List<IQueue>() {
-                               new QueueRMQ("snoozing")
+                               new QueueRMQ("snoozing",arguments: new Dictionary<string,object>{ }),
+                               new QueueRMQ("snoozing-dlx")
                            },
                            new List<IBinding>() {
                                new BindingRMQ(BindType.Queue, "eventbus",BindType.Queue, "snoozing","wakeup")
                            });
-        }
-
-        [HttpGet]
-        [Route("status")]
-        public ActionResult Status([FromQuery] string service)
-        {
-            object status;
-
-            if (string.IsNullOrWhiteSpace(service))
-            {
-                status = _bus.Status();
-            }
-            else
-            {
-                status = _bus.PublishAsync(new StatusIntegrationEvent(service));
-            }
-
-            return CustomResponse(status);
         }
 
         [HttpGet]
