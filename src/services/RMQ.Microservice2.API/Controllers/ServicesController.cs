@@ -21,8 +21,12 @@ namespace RMQ.Microservice2.API.Controllers
         public ServicesController(IEventBus bus)
         {
             _bus = bus;
-            _bus.CreateBus("localhost", 5672, "guest", "guest");
-            //               new Dictionary<string, string>() { { "eventbus", "direct" } });
+            _bus.CreateBus(new Dictionary<string, object>() {
+                {"hostname","localhost" },
+                {"port",5672 },
+                {"username","guest" },
+                {"password","guest" } 
+            });
         }
 
         [HttpGet]

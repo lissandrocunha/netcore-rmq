@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RMQ.EventBus.Core.Implementations.RabbitMQ.Objects
+namespace RMQ.EventBus.RabbitMQ.Objects
 {
-    public class BindingRMQ : IBinding
+    public class Binding : IBinding
     {
         private readonly BindType _sourceType;
         private readonly string _source;
@@ -23,7 +23,7 @@ namespace RMQ.EventBus.Core.Implementations.RabbitMQ.Objects
         public string RouteKey => _routeKey;
         public IDictionary<string, object> Arguments => _arguments;
 
-        public BindingRMQ(BindType sourceType,
+        public Binding(BindType sourceType,
                           string source,
                           BindType destinationType,
                           string destination,

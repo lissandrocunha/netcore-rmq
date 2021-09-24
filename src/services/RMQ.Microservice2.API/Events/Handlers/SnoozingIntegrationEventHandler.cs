@@ -26,9 +26,15 @@ namespace RMQ.Microservice2.API.Events.Handlers
         public SnoozingIntegrationEventHandler(IEventBus bus,
                                                ILogger<SnoozingIntegrationEventHandler> logger)
         {
-            _bus = bus;
-            _bus.CreateBus("localhost", 5672, "guest", "guest");
             _logger = logger;
+            _bus = bus;
+            _bus.CreateBus(new Dictionary<string, object>() {
+                {"hostname","localhost" },
+                {"port",5672 },
+                {"username","guest" },
+                {"password","guest" }
+            });
+            
         }
 
         #endregion

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RMQ.EventBus.Core.Events
 {
-    public class ResponseMessage
+    public class ResponseMessage : IntegrationEvent
     {
     }
 }

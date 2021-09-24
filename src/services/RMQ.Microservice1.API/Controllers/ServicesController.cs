@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RMQ.API.Core.Controllers;
 using RMQ.EventBus.Core.Abstractions;
 using RMQ.EventBus.Core.Abstractions.Objects;
-using RMQ.EventBus.Core.Implementations.RabbitMQ.Objects;
+using RMQ.EventBus.RabbitMQ.Objects;
 using RMQ.Microservice1.API.Events;
 using System;
 using System.Collections.Generic;
@@ -22,18 +22,22 @@ namespace RMQ.Microservice1.API.Controllers
         public ServicesController(IEventBus bus)
         {
             _bus = bus;
-            _bus.CreateBus("localhost", 5672, "guest", "guest",
-                           new List<IExchange>() {
-                               new ExchangeRMQ("eventbus","direct",true,false),
-                               new ExchangeRMQ("eventbus-dlx","direct",true,false)
-                           },
-                           new List<IQueue>() {
-                               new QueueRMQ("snoozing",arguments: new Dictionary<string,object>{ }),
-                               new QueueRMQ("snoozing-dlx")
-                           },
-                           new List<IBinding>() {
-                               new BindingRMQ(BindType.Queue, "eventbus",BindType.Queue, "snoozing","wakeup")
-                           });
+
+            _bus.CreateBus(new Dictionary<string, object>() {
+                {"hostname","localhost" },
+                {"port",5672 },
+                {"username","guest" },
+                {"password","guest" },
+                {"exchanges", new List<IExchange>() {
+                               new Exchange("eventbus","direct",true,false),
+                               new Exchange("eventbus-dlx","direct",true,false) }},
+                {"queues",  new List<IQueue>() {
+                               new Queue("snoozing",arguments: new Dictionary<string,object>{ }),
+                               new Queue("snoozing-dlx")}},
+                {"bindings",new List<IBinding>() {
+                               new Binding(BindType.Queue, "eventbus",BindType.Queue, "snoozing","wakeup")} }
+            });
+
         }
 
         [HttpGet]

@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\building blocks\RMQ.API.Core\RMQ.API.Core.csproj" />
     <ProjectReference Include="..\..\building blocks\RMQ.EventBus.Core\RMQ.EventBus.Core.csproj" />
+    <ProjectReference Include="..\..\building blocks\RMQ.EventBus.RabbitMQ\RMQ.EventBus.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>

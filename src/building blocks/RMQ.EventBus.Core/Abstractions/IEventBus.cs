@@ -10,29 +10,13 @@ namespace RMQ.EventBus.Core.Abstractions
 {
     public interface IEventBus : IDisposable
     {
-        /// <summary>
-        /// Show bus status
-        /// </summary>
-        /// <returns>bus informations</returns>
-        object Status();
+
 
         /// <summary>
         /// Create a Bus
         /// </summary>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        /// <param name="userName"></param>
-        /// <param name="password"></param>
-        /// <param name="exchanges">Exchanges to create on Bus</param>
-        /// <param name="queues">Queues to create on Bus</param>
-        /// <param name="bindings">Bindings to create</param>
-        public void CreateBus(string hostname,
-                              int port,
-                              string userName,
-                              string password,
-                              ICollection<IExchange> exchanges = null,
-                              ICollection<IQueue> queues = null,
-                              ICollection<IBinding> bindings = null);
+        /// <param name="configurations">Dictionary with params to create a bus</param>
+        public void CreateBus(IReadOnlyDictionary<string, object> configurations);
 
         /// <summary>
         /// Publishes a event
