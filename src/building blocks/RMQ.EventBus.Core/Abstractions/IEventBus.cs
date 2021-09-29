@@ -26,10 +26,19 @@ namespace RMQ.EventBus.Core.Abstractions
         /// <param name="routingKey">Tag to use</param>
         void Publish(IntegrationEvent @event, string exchange = "", string routingKey = "");
 
-
+        /// <summary>
+        /// Consume a event in a queue
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="queue"></param>
+        /// <returns></returns>
         public Task<IntegrationEvent> Consume<T>(string queue)
             where T : IntegrationEvent;
 
 
+        IDisposable RespondAsync<TRequest, TResponse>(string replyQueue,
+                                                      Func<TRequest, Task<TResponse>> responder)
+            where TRequest : IntegrationEvent
+            where TResponse : ResponseMessage;
     }
 }

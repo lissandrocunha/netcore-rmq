@@ -34,17 +34,21 @@ namespace RMQ.Microservice2.API.Events.Handlers
                 {"username","guest" },
                 {"password","guest" }
             });
-            
+
         }
 
         #endregion
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //_bus.RespondAsync<SnoozingIntegrationEvent, ResponseMessage>(async request => new ResponseMessage(await ));
-
+            _bus.RespondAsync<SnoozingIntegrationEvent, ResponseMessage>("", async request => new ResponseMessage(await ProcessingSnoozing(request)));
 
             return Task.CompletedTask;
+        }
+
+        private Task<string> ProcessingSnoozing(object request)
+        {
+            return Task.FromResult("");
         }
     }
 }

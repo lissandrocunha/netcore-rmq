@@ -110,6 +110,89 @@ namespace RMQ.EventBus.RabbitMQ
             return Task.FromResult(message);
         }
 
+        public Task<TResponse> Request<TRequest, TResponse>(TRequest @event, string exchange = "", string routingKey = "", string replyQueue = "")
+            where TRequest : IntegrationEvent
+            where TResponse : IResponseEvent<TRequest>
+        {
+
+            _logger.LogInformation("Request Event({0} - ID:{1}, Created: {2}) on RabbitMQ...",
+                                 @event.GetType().Name,
+                                 @event.Id,
+                                 @event.CreationDate);
+            try
+            {
+                using (var connection = _connectionFactory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    channel.ConfirmSelect();
+                    channel.BasicAcks += Evento_Confirmacao;
+                    channel.BasicNacks += Evento_NaoConfirmacao;
+
+
+
+                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(@event));
+                    routingKey = string.IsNullOrWhiteSpace(routingKey) ? @event.GetType().Name?.ToLower().Replace("integrationevent", "") : routingKey;
+
+                    var properties = channel.CreateBasicProperties();
+                    properties.Persistent = true;
+                    properties.ReplyTo = replyQueue;
+
+                    channel.BasicPublish(exchange: exchange,
+                                         routingKey: routingKey,
+                                         basicProperties: properties,
+                                         body: body);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error on Publishing: {0}", ex);
+                return null;
+            }
+            _logger.LogInformation("Event Published.");
+
+            return null;
+        }
+
+        public Task<TResponse> Response<TRequest, TResponse>(string replyQueue, Action<TResponse> @response)
+            where TRequest : IntegrationEvent
+            where TResponse : IResponseEvent<TRequest>
+        {
+
+            _logger.LogInformation("Response Event({0} on RabbitMQ...",
+                                   @response.GetType().Name);
+            try
+            {
+                using (var connection = _connectionFactory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    channel.ConfirmSelect();
+                    channel.BasicAcks += Evento_Confirmacao;
+                    channel.BasicNacks += Evento_NaoConfirmacao;
+
+                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(@response));
+
+                    var properties = channel.CreateBasicProperties();
+                    properties.Persistent = true;
+                    properties.ReplyTo = replyQueue;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error on Publishing: {0}", ex);
+                return null;
+            }
+            _logger.LogInformation("Event Published.");
+
+            return null;
+        }
+
+        public IDisposable RespondAsync<TRequest, TResponse>(string replyQueue, Func<TRequest, Task<TResponse>> responder)
+            where TRequest : IntegrationEvent where TResponse : ResponseMessage
+        {
+            throw new NotImplementedException();
+        }
+
         private void Evento_Confirmacao(object sender, BasicAckEventArgs e)
         {
             _logger.LogInformation("Confirmação do evento: {0} - {1}", sender.ToString(), e.DeliveryTag);

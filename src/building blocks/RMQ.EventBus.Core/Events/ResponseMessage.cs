@@ -8,5 +8,11 @@ namespace RMQ.EventBus.Core.Events
 {
     public class ResponseMessage : IntegrationEvent
     {
+        private object v;
+
+        public ResponseMessage(object v)
+        {
+            this.v = v;
+        }
     }
 }

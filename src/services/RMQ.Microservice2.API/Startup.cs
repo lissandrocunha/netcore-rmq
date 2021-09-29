@@ -34,6 +34,7 @@ namespace RMQ.Microservice2.API
             services.AddSwaggerConfiguration();
             services.AddDIConfiguration();
             services.AddControllers();
+            services.AddApplicationInsightsConfiguration(Configuration);
 
         }
 

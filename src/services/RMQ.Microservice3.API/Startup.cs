@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RMQ.API.Core.Configuration;
+using RMQ.Microservice3.API.Configuration;
 using RMQ.Microservice3.API.Configuration.Swagger;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace RMQ.Microservice3.API
         {
             services.AddSwaggerConfiguration();
             services.AddControllers();
+            services.AddApplicationInsightsConfiguration(Configuration);
 
         }
 
